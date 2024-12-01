@@ -13,6 +13,15 @@ public class CivilizationCardPlace implements InterfaceFigureLocationInternal {
     private Optional<CivilizationCard> nextCard;
     private CivilizationCardPlace nextPlace;
 
+    private GetSomethingChoice getSomethingChoicePerformer;
+    private GetSomethingThrow getSomethingThrow;
+
+//    private GetCard getCardImmediateEffectPerformer;
+//    private AllPlayersTakeAReward allPlayersTakeARewardEffectPerformer;
+//    private GetSomethingFixed getSomethingFixedPerformer;
+//    private GetSomethingChoice getSomethingChoicePerformer;
+
+
     public CivilizationCardPlace(final CivilizationCardPlace nextPlace, final CivilizationCardDeck deck,
                                  final int requiredResources) {
         this.requiredResources = requiredResources;
@@ -20,20 +29,23 @@ public class CivilizationCardPlace implements InterfaceFigureLocationInternal {
         this.deck = deck;
         this.nextCard = this.next();
         this.figures = new ArrayList<>();
+
     }
 
     public Optional<CivilizationCard> next() {
 
-        if (this.nextCard != null && this.nextCard.isPresent()) {
-            return this.nextCard;
+        if(nextCard != null && nextCard.isPresent()){
+            Optional<CivilizationCard> temp = nextCard;
+            nextCard = Optional.empty();
+            return temp;
+        }else{
+            if(nextPlace != null){
+                nextCard = nextPlace.next();
+            }else{
+                nextCard = deck.getTop();
+            }
         }
-
-        if (this.nextPlace == null) {
-            this.nextCard = this.deck.getTop();
-        } else {
-            this.nextCard = this.nextPlace.next();
-        }
-        return this.nextCard;
+        return nextCard;
     }
 
     @Override
@@ -65,31 +77,62 @@ public class CivilizationCardPlace implements InterfaceFigureLocationInternal {
 
     @Override
     public ActionResult makeAction(Player player, Effect[] inputResources, Effect[] outputResources) {
-        if (!this.figures.contains(player.playerOrder())) {
+        List<Effect> input = Arrays.asList(inputResources);
+
+        if (!figures.equals(player.playerOrder())) {
             return ActionResult.FAILURE;
         }
 
-        if (inputResources.length != this.requiredResources) {
+        if (input.size() != requiredResources) {
             return ActionResult.FAILURE;
         }
 
-        if (outputResources.length != 0) {
-            return ActionResult.FAILURE;
-        }
-        int resourceCount = 0;
-        for (Effect effect : inputResources) {
-            if (effect.isResource()) {
-                resourceCount++;
+        for (Effect effect : input) {
+            if (!effect.isResource()) {
+                return ActionResult.FAILURE;
             }
         }
-        if (resourceCount != this.requiredResources) {
-            return ActionResult.FAILURE;
-        }
-        if (!player.playerBoard().takeResources(List.of(inputResources))) {
+
+        if (!player.playerBoard().takeResources(input)) {
             return ActionResult.FAILURE;
         }
 
-        this.figures.remove(player.playerOrder());
+
+        List<ImmediateEffect> immediateEffects = nextCard.get().getImmediateEffectType();
+
+//        getCardImmediateEffectPerformer = new GetCard(deck);
+//        getSomethingFixedPerformer = new GetSomethingFixed();
+//        getSomethingChoicePerformer = new GetSomethingChoice(2);
+//        allPlayersTakeARewardEffectPerformer = new AllPlayersTakeAReward();
+//        getSomethingThrow = new GetSomethingThrow(inputResources);
+
+        for(ImmediateEffect immediateEffect: immediateEffects){
+//            boolean result = switch (immediateEffect){
+//                case ThrowGold -> getSomethingThrow.perform(player, Effect.GOLD);
+//                case ThrowStone -> getSomethingThrow.perform(player, Effect.STONE);
+//                case ThrowClay -> getSomethingThrow.perform(player, Effect.CLAY);
+//                case ThrowWood -> getSomethingThrow.perform(player, Effect.WOOD);
+//                case POINT -> getSomethingFixedPerformer.perform(player, ImmediateEffect.POINT);
+//                case WOOD -> getSomethingFixedPerformer.perform(player, Effect.WOOD);
+//                case CLAY -> getSomethingFixedPerformer.perform(player, Effect.CLAY);
+//                case STONE -> getSomethingFixedPerformer.perform(player, Effect.STONE);
+//                case GOLD -> getSomethingFixedPerformer.perform(player, Effect.GOLD);
+//                case CARD -> getSomethingFixedPerformer.perform(player, Effect.CARD);
+//                case FOOD -> getSomethingFixedPerformer.perform(player, Effect.FOOD);
+//                case ArbitraryResource:
+//                    for(Effect inputResource: inputResources){
+//                        getSomethingChoicePerformer.performEffect(player, inputResource);
+//                    }
+//                    case AllPlayersTakeReward -> allPlayersTakeARewardEffectPerformer.perform(player, Effect.BUILDING);
+//                    default -> false;
+//            };
+//            if(!result){
+//                return ActionResult.FAILURE;
+//            }
+        }
+
+        figures = null;
+        nextCard = Optional.empty();
         return ActionResult.ACTION_DONE;
     }
 
@@ -101,6 +144,16 @@ public class CivilizationCardPlace implements InterfaceFigureLocationInternal {
 
         this.figures.remove(player.playerOrder());
         return true;
+    }
+
+    public int getRequiredResources() {
+        return requiredResources;
+    }
+    public int getFiguresCount() {
+        return figures.size();
+    }
+    public Optional<CivilizationCard> getNextCard() {
+        return nextCard;
     }
 
     @Override

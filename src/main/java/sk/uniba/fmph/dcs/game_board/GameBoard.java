@@ -50,6 +50,7 @@ public class GameBoard implements InterfaceGetState {
 
         // Civilization card slots
         CivilizationCardDeck deck = new CivilizationCardDeck(civilizationCards);
+
         var ccp1 = new CivilizationCardPlace(null, deck, 1);
         var ccp2 = new CivilizationCardPlace(ccp1, deck, 2);
         var ccp3 = new CivilizationCardPlace(ccp2, deck, 3);

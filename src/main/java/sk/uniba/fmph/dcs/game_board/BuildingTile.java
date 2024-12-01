@@ -56,7 +56,7 @@ public class BuildingTile implements InterfaceFigureLocationInternal {
         }
         
         // Give points to player
-        player.playerBoard().giveEffect(new Effect[]{Effect.BUILDING});
+        player.playerBoard().giveEffect(List.of(new Effect[]{Effect.BUILDING}));
         return ActionResult.ACTION_DONE;
     }
 
