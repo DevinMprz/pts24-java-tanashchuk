@@ -29,6 +29,7 @@ public class VariableBuilding implements Building {
 
         // Count unique resource types
         HashSet<Effect> uniqueResources = new HashSet<>(resources);
+        System.out.println(uniqueResources.size());
         if (uniqueResources.size() != numberOfResourceTypes) {
             return OptionalInt.empty();
         }

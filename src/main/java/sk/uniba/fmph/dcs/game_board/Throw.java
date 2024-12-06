@@ -5,7 +5,7 @@ import java.util.Random;
 public class Throw {
 
     // I can't use the method name "throw" because it causes a syntax error.
-    public int[] throw_(int dices){
+    public static int[] throw_(int dices){
         int[] result = new int[dices];
         Random rand = new Random();
         for (int i = 0; i < dices; i++) {

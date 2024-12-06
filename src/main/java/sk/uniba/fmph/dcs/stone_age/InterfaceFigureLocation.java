@@ -9,4 +9,6 @@ public interface InterfaceFigureLocation {
     boolean skipAction(PlayerOrder player);
     HasAction tryToMakeAction(PlayerOrder player);
     boolean newTurn();
+
+    String state();
 }

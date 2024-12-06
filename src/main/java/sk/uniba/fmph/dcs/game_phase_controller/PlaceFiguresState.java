@@ -1,32 +1,34 @@
 package sk.uniba.fmph.dcs.game_phase_controller;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 import sk.uniba.fmph.dcs.stone_age.*;
 
 /**
  * Represents the game phase where players place their figures on locations.
  * Only figure placement actions are valid during this phase.
- * 
+ *
  * Note: This class does not check if it's the player's turn - that validation
  * is handled by GamePhaseController before any actions are delegated here.
  * This separation of concerns keeps turn management logic in one place.
  */
 public class PlaceFiguresState implements InterfaceGamePhaseState {
-    
+
     /**
      * Maps game locations to their corresponding figure placement handlers
      */
     private final Map<Location, InterfaceFigureLocation> places;
-    
+    private final List<Player> players;
+
+
     /**
      * Creates a new PlaceFiguresState with the given location mappings
      *
      * @param places Map of locations to their figure placement handlers
      */
-    public PlaceFiguresState(Map<Location, InterfaceFigureLocation> places) {
+    public PlaceFiguresState(Map<Location, InterfaceFigureLocation> places, List<Player> players) {
         this.places = places;
+        this.players = players;
     }
 
     /**
@@ -43,24 +45,26 @@ public class PlaceFiguresState implements InterfaceGamePhaseState {
         if (place == null) {
             return ActionResult.FAILURE;
         }
-        
-        return place.placeFigures(player, figuresCount) 
-            ? ActionResult.ACTION_DONE 
-            : ActionResult.FAILURE;
+
+        if(place.placeFigures(player, figuresCount)){
+            return ActionResult.ACTION_DONE;
+        }else{
+            return ActionResult.FAILURE;
+        }
     }
 
     /**
      * Checks if the player can make any automatic figure placements
-     * 
+     *
      * @param player The player to check for possible actions
      * @return WAITING_FOR_PLAYER_ACTION if player has figures to place,
      *         NO_ACTION_POSSIBLE if no figures can be placed
      */
     @Override
     public HasAction tryToMakeAutomaticAction(PlayerOrder player) {
-        for (InterfaceFigureLocation place : places.values()) {
-            HasAction result = place.tryToPlaceFigures(player, 1);
-            if (result == HasAction.WAITING_FOR_PLAYER_ACTION) {
+        for(Player currPl : players){
+            if(currPl.getPlayerOrder().equals(player)
+                    && currPl.getPlayerBoard().hasFigures(1)){
                 return HasAction.WAITING_FOR_PLAYER_ACTION;
             }
         }
@@ -70,8 +74,8 @@ public class PlaceFiguresState implements InterfaceGamePhaseState {
     // The following methods return FAILURE as they are not valid actions during the Place Figures phase
 
     @Override
-    public ActionResult makeAction(PlayerOrder player, Location location, 
-            Collection<Effect> inputResources, Collection<Effect> outputResources) {
+    public ActionResult makeAction(PlayerOrder player, Location location,
+                                   Collection<Effect> inputResources, Collection<Effect> outputResources) {
         return ActionResult.FAILURE;
     }
 

@@ -9,7 +9,6 @@ public interface InterfacePlayerBoardGameBoard {
     void giveEffect(Collection<Effect> stuff);
     void giveFigure();
     void giveEndOfGameEffect(Collection<EndOfGameEffect> stuff);
-    void giveCard(CivilizationCard card);
     boolean takeResources(Collection<Effect> stuff);
     boolean takeFigures(int count);
     boolean hasFigures(int count);

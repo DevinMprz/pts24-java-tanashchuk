@@ -9,11 +9,11 @@ import java.util.Collection;
 
 public class TribeFedStatusTest {
     private TribeFedStatus status;
-    
-    @Before
-    public void setUp() {
-        status = new TribeFedStatus();
-    }
+
+//    @Before
+//    public void setUp() {
+//        status = new TribeFedStatus();
+//    }
 
     @Test
     public void testInitialState() {
@@ -56,7 +56,7 @@ public class TribeFedStatusTest {
         food.add(Effect.FOOD);
         status.feedTribe(food);
         assertTrue(status.isTribeFed());
-        
+
         status.newTurn();
         assertFalse(status.isTribeFed());
     }

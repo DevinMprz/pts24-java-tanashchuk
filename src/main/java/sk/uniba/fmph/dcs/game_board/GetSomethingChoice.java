@@ -23,7 +23,7 @@ public class GetSomethingChoice implements EvaluateCivilizationCardImmediateEffe
         List<Effect> effectToGive = new ArrayList<>();
         effectToGive.add(choice);
 
-        player.playerBoard().giveEffect(effectToGive);
+        player.getPlayerBoard().giveEffect(effectToGive);
         return true;
     }
 

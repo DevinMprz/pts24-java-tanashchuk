@@ -16,7 +16,6 @@ public class ArbitraryBuilding implements Building {
         if (resources.isEmpty() || resources.size() > maxNumberOfResources) {
             return OptionalInt.empty();
         }
-
         // Verify all resources are valid
         for (Effect resource : resources) {
             if (!resource.isResource()) {
@@ -32,7 +31,9 @@ public class ArbitraryBuilding implements Building {
 
         return OptionalInt.of(points);
     }
-
+    public int getMaxNumberOfResources() {
+        return maxNumberOfResources;
+    }
     @Override
     public String state() {
         return String.format("ArbitraryBuilding[maxResources=%d]", maxNumberOfResources);
