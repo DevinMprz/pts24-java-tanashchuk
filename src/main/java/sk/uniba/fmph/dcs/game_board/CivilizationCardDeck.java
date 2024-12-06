@@ -2,6 +2,7 @@ package sk.uniba.fmph.dcs.game_board;
 
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
@@ -9,7 +10,7 @@ import java.util.Stack;
 public class CivilizationCardDeck {
     private Stack<CivilizationCard> cardsDeck;
 
-    public CivilizationCardDeck(CivilizationCard[] cardDeck){
+    public CivilizationCardDeck(Collection<CivilizationCard> cardDeck){
         this.cardsDeck = new Stack<>();
         for (CivilizationCard card : cardDeck) {
             this.cardsDeck.push(card);

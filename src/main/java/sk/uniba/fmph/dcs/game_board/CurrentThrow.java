@@ -53,7 +53,7 @@ public class CurrentThrow implements InterfaceToolUse {
             return false;
         }
 
-        Optional<Integer> a = player.playerBoard().useTool(idx);
+        Optional<Integer> a = player.getPlayerBoard().useTool(idx);
         if (a.isPresent()) {
             throwResult += a.get();
             toolsUsed = true;
@@ -69,7 +69,7 @@ public class CurrentThrow implements InterfaceToolUse {
      */
     @Override
     public boolean canUseTools() {
-        return this.player.playerBoard().hasSufficientTools(1);
+        return this.player.getPlayerBoard().hasSufficientTools(1);
     }
 
     /**
@@ -91,27 +91,27 @@ public class CurrentThrow implements InterfaceToolUse {
 
         switch (throwsFor) {
             case WOOD:
-                for (int i = 0; i < Math.floorDiv(throwResult, throwsFor.points()); i++) {
+                for (int i = 0; i < Math.floorDiv(throwResult, Effect.WOOD.points()); i++) {
                     effects.add(Effect.WOOD);
                 }
                 break;
             case CLAY:
-                for (int i = 0; i < Math.floorDiv(throwResult, throwsFor.points()); i++) {
+                for (int i = 0; i < Math.floorDiv(throwResult, Effect.CLAY.points()); i++) {
                     effects.add(Effect.CLAY);
                 }
                 break;
             case STONE:
-                for (int i = 0; i < Math.floorDiv(throwResult, throwsFor.points()); i++) {
+                for (int i = 0; i < Math.floorDiv(throwResult, Effect.STONE.points()); i++) {
                     effects.add(Effect.STONE);
                 }
                 break;
             case GOLD:
-                for (int i = 0; i < Math.floorDiv(throwResult, throwsFor.points()); i++) {
+                for (int i = 0; i < Math.floorDiv(throwResult, Effect.GOLD.points()); i++) {
                     effects.add(Effect.GOLD);
                 }
                 break;
             case FOOD:
-                for (int i = 0; i < Math.floorDiv(throwResult, throwsFor.points()); i++) {
+                for (int i = 0; i < Math.floorDiv(throwResult, Effect.FOOD.points()); i++) {
                     effects.add(Effect.FOOD);
                 }
                 break;
@@ -119,7 +119,7 @@ public class CurrentThrow implements InterfaceToolUse {
                 break;
         }
 
-        player.playerBoard().giveEffect(effects);
+        player.getPlayerBoard().giveEffect(effects);
         finished = true;
         return true;
     }
