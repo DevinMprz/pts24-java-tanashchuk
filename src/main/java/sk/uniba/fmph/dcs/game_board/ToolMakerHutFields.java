@@ -10,7 +10,9 @@ public class ToolMakerHutFields{
     private PlayerOrder toolMakerFigures;
     private PlayerOrder hutFigures;
     private PlayerOrder fieldsFigures;
-
+    private boolean canPlaceOnHut;
+    private boolean canPlaceOnField;
+    private boolean canPlaceOnToolMaker;
     private final int restriction;
 
 
@@ -20,6 +22,9 @@ public class ToolMakerHutFields{
         }else{
             this.restriction = 3;
         }
+        canPlaceOnHut = true;
+        canPlaceOnField = true;
+        canPlaceOnToolMaker = true;
     }
 
     private boolean checkRestriction(){
@@ -44,22 +49,24 @@ public class ToolMakerHutFields{
             return false;
         }
 
-        toolMakerFigures = player.playerOrder();
+        toolMakerFigures = player.getPlayerOrder();
         return true;
     }
 
     public boolean actionToolMaker(final Player player){
-        if(!player.playerOrder().equals(toolMakerFigures)){
+        if(!player.getPlayerOrder().equals(toolMakerFigures)){
             return false;
         }
         ArrayList<Effect> list = new ArrayList<>();
         list.add(Effect.TOOL);
-        player.playerBoard().giveEffect(list);
+        player.getPlayerBoard().giveEffect(list);
+        canPlaceOnToolMaker = false;
+        toolMakerFigures = null;
         return true;
     }
     //
     public boolean canPlaceOnToolMaker(final Player player){
-        return toolMakerFigures == null && checkRestriction();
+        return toolMakerFigures == null && canPlaceOnToolMaker && checkRestriction();
     }
 
     public boolean placeOnHut(final Player player){
@@ -67,20 +74,22 @@ public class ToolMakerHutFields{
             return false;
         }
 
-        hutFigures = player.playerOrder();
+        hutFigures = player.getPlayerOrder();
         return true;
     }
 
     public boolean canPlaceOnHut(final Player player){
-        return hutFigures == null && checkRestriction();
+        return hutFigures == null && canPlaceOnHut && checkRestriction();
     }
 
     public boolean actionHut(final Player player){
-        if(!player.playerOrder().equals(hutFigures)){
+        if(!player.getPlayerOrder().equals(hutFigures)){
             return false;
         }
 
-        player.playerBoard().giveFigure();
+        player.getPlayerBoard().giveFigure();
+        canPlaceOnHut = false;
+        hutFigures = null;
         return true;
     }
 
@@ -89,29 +98,34 @@ public class ToolMakerHutFields{
             return false;
         }
 
-        fieldsFigures = player.playerOrder();
+        fieldsFigures = player.getPlayerOrder();
         return true;
 
     }
 
     public boolean actionFields(final Player player){
-        if(!player.playerOrder().equals(fieldsFigures)){
+        if(!player.getPlayerOrder().equals(fieldsFigures)){
             return false;
         }
         ArrayList<Effect> list = new ArrayList<>();
         list.add(Effect.FIELD);
-        player.playerBoard().giveEffect(list);
+        player.getPlayerBoard().giveEffect(list);
+        fieldsFigures = null;
+        canPlaceOnField = false;
         return true;
     }
 
     public boolean canPlaceOnFields(final Player player){
-        return fieldsFigures == null && checkRestriction();
+        return fieldsFigures == null && canPlaceOnField && checkRestriction();
     }
     public boolean newTurn(){
+        canPlaceOnHut = true;
+        canPlaceOnField = true;
+        canPlaceOnToolMaker = true;
         toolMakerFigures = null;
         hutFigures = null;
         fieldsFigures = null;
-        return true;
+        return false;
     }
 
     public String state(){

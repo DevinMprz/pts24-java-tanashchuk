@@ -9,7 +9,7 @@ public class WaitingForToolUseState implements InterfaceGamePhaseState {
     private InterfaceToolUse toolUse;
     private PlayerOrder currentPlayer;
 
-    WaitingForToolUseState(PlayerOrder player) {
+    public WaitingForToolUseState(PlayerOrder player) {
         currentPlayer = player;
     }
 

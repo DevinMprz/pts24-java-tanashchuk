@@ -10,7 +10,7 @@ import sk.uniba.fmph.dcs.player_board.PlayerFigures;
 public final class TribeFedStatus implements InterfaceFeedTribe, InterfaceNewTurn {
     private static final int MAX_FIELDS = 10;
     private static final int FOOD_PER_FIGURE = 1;
-    
+
     private final PlayerFigures figures;
     private boolean tribeFed;
     private int fields;
@@ -83,8 +83,9 @@ public final class TribeFedStatus implements InterfaceFeedTribe, InterfaceNewTur
     }
 
     @Override
-    public void newTurn() { //TODO --> boolean newTurn()
+    public boolean newTurn() {
         tribeFed = false;
+        return false;
     }
 
     public void addField() {
@@ -103,8 +104,8 @@ public final class TribeFedStatus implements InterfaceFeedTribe, InterfaceNewTur
 
     public String state() {
         Map<String, Object> state = Map.of(
-            "tribeFed", tribeFed,
-            "fields", fields
+                "tribeFed", tribeFed,
+                "fields", fields
         );
         return new JSONObject(state).toString();
     }

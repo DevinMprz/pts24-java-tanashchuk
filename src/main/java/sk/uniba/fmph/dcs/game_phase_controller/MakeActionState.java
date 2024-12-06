@@ -1,8 +1,11 @@
 package sk.uniba.fmph.dcs.game_phase_controller;
 
+import sk.uniba.fmph.dcs.game_board.PlaceOnHutAdaptor;
 import sk.uniba.fmph.dcs.stone_age.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,21 +21,26 @@ public class MakeActionState implements InterfaceGamePhaseState {
      * This map is used to delegate actions to the appropriate location.
      */
     private final Map<Location, InterfaceFigureLocation> places;
+    private final List<PlayerOrder> usedPlayers = new ArrayList<>();
 
     /**
      * The player who is currently taking their turn during the "Make Action" phase.
      */
-    private final PlayerOrder currentPlayer;
+    //private final PlayerOrder currentPlayer;
+
+    public MakeActionState(){
+        places = null;
+    }
 
     /**
      * Constructs a new {@code MakeActionState} with the specified places and current player.
      *
      * @param places         a map of locations to their corresponding figure locations
-     * @param currentPlayer  the player who is currently taking their turn
+     * //@param currentPlayer  the player who is currently taking their turn
      */
-    public MakeActionState(Map<Location, InterfaceFigureLocation> places, PlayerOrder currentPlayer) {
+    public MakeActionState(Map<Location, InterfaceFigureLocation> places) {
         this.places = places;
-        this.currentPlayer = currentPlayer;
+        //this.currentPlayer = currentPlayer;
     }
 
     /**
@@ -63,9 +71,9 @@ public class MakeActionState implements InterfaceGamePhaseState {
     @Override
     public ActionResult makeAction(PlayerOrder player, Location location, Collection<Effect> inputResources, Collection<Effect> outputResources) {
         // Check if the player is the current player
-        if (!player.equals(currentPlayer)) {
-            return ActionResult.FAILURE;
-        }
+//        if (!player.equals(currentPlayer)) {
+//            return ActionResult.FAILURE;
+//        }
 
         InterfaceFigureLocation figureLocation = places.get(location);
         if (figureLocation == null) {
@@ -88,9 +96,9 @@ public class MakeActionState implements InterfaceGamePhaseState {
     @Override
     public ActionResult skipAction(PlayerOrder player, Location location) {
         // Check if the player is the current player
-        if (!player.equals(currentPlayer)) {
-            return ActionResult.FAILURE;
-        }
+//        if (!player.equals(currentPlayer)) {
+//            return ActionResult.FAILURE;
+//        }
 
         InterfaceFigureLocation figureLocation = places.get(location);
         if (figureLocation == null) {
@@ -178,27 +186,25 @@ public class MakeActionState implements InterfaceGamePhaseState {
      */
     @Override
     public HasAction tryToMakeAutomaticAction(PlayerOrder player) {
-        if (!player.equals(currentPlayer)) {
+        List<HasAction> playerActions = new ArrayList<>();
+
+        for(Location key: places.keySet()){
+            InterfaceFigureLocation playerLoc = places.get(key);
+            HasAction playerAction = playerLoc.tryToMakeAction(player);
+            if((key == Location.HUT || key == Location.FIELD || key == Location.TOOL_MAKER)
+                    && playerAction == HasAction.AUTOMATIC_ACTION_DONE){
+                playerActions.add(HasAction.AUTOMATIC_ACTION_DONE);
+            }
+            if(playerAction == HasAction.WAITING_FOR_PLAYER_ACTION || playerAction == HasAction.AUTOMATIC_ACTION_DONE){
+                playerActions.add(HasAction.WAITING_FOR_PLAYER_ACTION);
+            }
+        }
+        if(playerActions.isEmpty()){
             return HasAction.NO_ACTION_POSSIBLE;
         }
-
-        boolean hasWaitingActions = false;
-
-        for (InterfaceFigureLocation figureLocation : places.values()) {
-            HasAction hasAction = figureLocation.tryToMakeAction(player);
-            if (hasAction == HasAction.WAITING_FOR_PLAYER_ACTION) {
-                hasWaitingActions = true;
-                break;
-            }
-            if (hasAction == HasAction.AUTOMATIC_ACTION_DONE) {
-                return HasAction.AUTOMATIC_ACTION_DONE;
-            }
+        if(playerActions.contains(HasAction.AUTOMATIC_ACTION_DONE)){
+            return HasAction.AUTOMATIC_ACTION_DONE;
         }
-
-        if (hasWaitingActions) {
-            return HasAction.WAITING_FOR_PLAYER_ACTION;
-        }
-
-        return HasAction.NO_ACTION_POSSIBLE;
+        return HasAction.WAITING_FOR_PLAYER_ACTION;
     }
 }

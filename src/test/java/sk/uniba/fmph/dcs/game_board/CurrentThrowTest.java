@@ -3,6 +3,8 @@ package sk.uniba.fmph.dcs.game_board;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import sk.uniba.fmph.dcs.player_board.PlayerBoard;
+import sk.uniba.fmph.dcs.player_board.PlayerBoardGameBoardFacade;
 import sk.uniba.fmph.dcs.stone_age.*;
 
 import java.util.List;
@@ -14,51 +16,12 @@ public class CurrentThrowTest {
     private Player mockPlayer;
     private Effect mockEffect;
 
-    private static class MockPlayer implements Player {
-        private final PlayerOrder order;
-        private final PlayerBoard board;
 
-        public MockPlayer(int orderNum, PlayerBoard board) {
-            this.order = new PlayerOrder(orderNum, 2);
-            this.board = board;
-        }
-
-        @Override
-        public PlayerOrder playerOrder() {
-            return order;
-        }
-
-        @Override
-        public InterfacePlayerBoardGameBoard playerBoard() {
-            return (InterfacePlayerBoardGameBoard) board;
-        }
-    }
-    private static class MockPlayerBoard implements PlayerBoard {
-        private boolean hasFiguresResponse = true;
-
-        @Override
-        public boolean hasFigures(int count) {
-            return hasFiguresResponse;
-        }
-
-        @Override
-        public void giveEffect(Effect[] stuff) {
-
-        }
-
-        public void setHasFiguresResponse(boolean response) {
-            this.hasFiguresResponse = response;
-        }
-    }
     @Before
     public void setUp() {
         currentThrow = new CurrentThrow();
-
-        MockPlayerBoard mockPlayerBoard = new MockPlayerBoard();
         // Mocking a player
-        mockPlayer = new MockPlayer(0, mockPlayerBoard);
-        mockPlayer.playerBoard().giveEffect(List.of(new Effect[]{Effect.ONE_TIME_TOOL2}));
-        // Mocking an effect (assuming Effect is an enum or a class)
+        mockPlayer = new Player(new PlayerOrder(1, 4), new PlayerBoardGameBoardFacade(new PlayerBoard()));
         mockEffect = Effect.WOOD;
     }
 
@@ -75,10 +38,11 @@ public class CurrentThrowTest {
 
     @Test
     public void testUseToolSuccess() {
+        mockPlayer.getPlayerBoard().giveEffect(List.of(Effect.TOOL));
         // Assuming the player starts with tools available
         currentThrow.initiate(mockPlayer, mockEffect, 3);
 
-        boolean result = currentThrow.useTool(1); // Tool index 1
+        boolean result = currentThrow.useTool(0); // Tool index 1
         assertTrue(result);
     }
 
@@ -93,7 +57,8 @@ public class CurrentThrowTest {
 
     @Test
     public void testCanUseTools() {
-        currentThrow.initiate(mockPlayer, mockEffect, 3);
+        mockPlayer.getPlayerBoard().giveEffect(List.of(Effect.TOOL));
+        currentThrow.initiate(mockPlayer, mockEffect, 4);
         boolean result = currentThrow.canUseTools();
         assertTrue(result);
     }

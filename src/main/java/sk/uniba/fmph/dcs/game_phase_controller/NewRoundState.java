@@ -1,8 +1,11 @@
 package sk.uniba.fmph.dcs.game_phase_controller;
 
+import sk.uniba.fmph.dcs.player_board.PlayerBoardGameBoardFacade;
 import sk.uniba.fmph.dcs.stone_age.*;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The {@code NewRoundState} class represents the "New Round" phase in the Stone Age game.
@@ -16,22 +19,21 @@ public class NewRoundState implements InterfaceGamePhaseState {
      * An interface that handles the initialization of a new turn.
      * It provides the {@code newTurn()} method to reset the game state for the new round.
      */
-    private final InterfaceNewTurn places;
-
+    private final Map<Location, InterfaceFigureLocation> places;
+    private final List<Player> players;
     /**
      * A flag indicating whether the new round has been initialized.
      * This ensures that the initialization occurs only once per round.
      */
-    private boolean roundInitialized = false;
 
     /**
      * Constructs a new {@code NewRoundState} with the specified {@code InterfaceNewTurn} instance.
      *
      * @param places an instance of {@link InterfaceNewTurn} used to initialize the new round
      */
-    public NewRoundState(InterfaceNewTurn places) {
+    public NewRoundState(Map<Location, InterfaceFigureLocation> places, List<Player> players) {
         this.places = places;
-        this.roundInitialized = false;
+        this.players = players;
     }
 
     /**
@@ -159,17 +161,22 @@ public class NewRoundState implements InterfaceGamePhaseState {
      */
     @Override
     public HasAction tryToMakeAutomaticAction(PlayerOrder player) {
-        if (!roundInitialized) {
-            boolean gameEnded = places.newTurn();
-            roundInitialized = true;
-            if (gameEnded) {
-                return HasAction.NO_ACTION_POSSIBLE;
-            } else {
-                return HasAction.AUTOMATIC_ACTION_DONE;
+        boolean gameEnded = false;
+        for(Location location: places.keySet()){
+            InterfaceFigureLocation plLocation = places.get(location);
+            if(plLocation.newTurn()){
+                gameEnded = true;
+                break;
             }
-        } else {
-            // Round has already been initialized
+        }
+        if (gameEnded) {
             return HasAction.NO_ACTION_POSSIBLE;
+        } else {
+            for(Player player1: players){
+                PlayerBoardGameBoardFacade pl = (PlayerBoardGameBoardFacade) player1.getPlayerBoard();
+                pl.newTurn();
+            }
+            return HasAction.AUTOMATIC_ACTION_DONE;
         }
     }
 }

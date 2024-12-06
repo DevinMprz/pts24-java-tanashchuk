@@ -1,20 +1,17 @@
 package sk.uniba.fmph.dcs.game_phase_controller;
 
-import sk.uniba.fmph.dcs.stone_age.ActionResult;
-import sk.uniba.fmph.dcs.stone_age.Effect;
-import sk.uniba.fmph.dcs.stone_age.HasAction;
-import sk.uniba.fmph.dcs.stone_age.Location;
-import sk.uniba.fmph.dcs.stone_age.PlayerOrder;
-import sk.uniba.fmph.dcs.stone_age.InterfaceFeedTribe;
+import sk.uniba.fmph.dcs.player_board.PlayerBoardGameBoardFacade;
+import sk.uniba.fmph.dcs.stone_age.*;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public final class FeedTribeState implements InterfaceGamePhaseState {
 
-    private final Map<PlayerOrder, InterfaceFeedTribe> playerTribes;
+    private final List<Player> playerTribes;
 
-    public FeedTribeState(Map<PlayerOrder, InterfaceFeedTribe> playerTribes) {
+    public FeedTribeState(List<Player> playerTribes) {
         this.playerTribes = playerTribes;
     }
 
@@ -46,16 +43,28 @@ public final class FeedTribeState implements InterfaceGamePhaseState {
 
     @Override
     public ActionResult feedTribe(final PlayerOrder player, final Collection<Effect> resources) {
-        if (playerTribes.get(player).feedTribe(resources)) {
-            return ActionResult.ACTION_DONE;
+        for(Player key: playerTribes){
+            if(key.getPlayerOrder().equals(player)){
+                InterfaceFeedTribe pl = (InterfaceFeedTribe) key.getPlayerBoard();
+                if (pl.feedTribe(resources)) {
+                    return ActionResult.ACTION_DONE;
+                }
+                break;
+            }
         }
         return ActionResult.FAILURE;
     }
 
     @Override
     public ActionResult doNotFeedThisTurn(final PlayerOrder player) {
-        if (playerTribes.get(player).doNotFeedThisTurn()) {
-            return ActionResult.ACTION_DONE;
+        for(Player key: playerTribes){
+            if(key.getPlayerOrder().equals(player)){
+                InterfaceFeedTribe pl = (InterfaceFeedTribe) key.getPlayerBoard();
+                if (pl.doNotFeedThisTurn()) {
+                    return ActionResult.ACTION_DONE;
+                }
+                break;
+            }
         }
         return ActionResult.FAILURE;
     }
@@ -67,13 +76,18 @@ public final class FeedTribeState implements InterfaceGamePhaseState {
 
     @Override
     public HasAction tryToMakeAutomaticAction(final PlayerOrder player) {
-        if (playerTribes.get(player).isTribeFed()) {
-            return HasAction.NO_ACTION_POSSIBLE;
+        for(Player key: playerTribes){
+            if(key.getPlayerOrder().equals(player)){
+                InterfaceFeedTribe pl = (InterfaceFeedTribe) key.getPlayerBoard();
+                if (pl.isTribeFed()) {
+                    return HasAction.NO_ACTION_POSSIBLE;
+                }
+                if (pl.feedTribeIfEnoughFood()) {
+                    return HasAction.AUTOMATIC_ACTION_DONE;
+                }
+                break;
+            }
         }
-        if (playerTribes.get(player).feedTribeIfEnoughFood()) {
-            return HasAction.AUTOMATIC_ACTION_DONE;
-        }
-
         return HasAction.WAITING_FOR_PLAYER_ACTION;
     }
 }

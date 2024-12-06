@@ -21,6 +21,10 @@ public final class SimpleBuilding implements Building {
         }
     }
 
+    public ArrayList<Effect> getRequiredResources() {
+        return requiredResources;
+    }
+
     public OptionalInt build(final Collection<Effect> resources) {
         if (!CollectionUtils.isEqualCollection(this.requiredResources, resources)) {
             return OptionalInt.empty();

@@ -4,9 +4,7 @@ import org.json.JSONObject;
 import sk.uniba.fmph.dcs.stone_age.*;
 import sk.uniba.fmph.dcs.game_board.InterfaceFigureLocationInternal;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The {@code ResourceSource} class represents a resource-producing location on the game board, such as
@@ -53,13 +51,13 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
      */
     @Override
     public boolean placeFigures(Player player, int figureCount) {
-        if (this.figures.contains(player.playerOrder())) {
+        if (this.figures.contains(player.getPlayerOrder())) {
             return false;
         }
         if (this.figures.size() + figureCount > this.maxFigures) {
             return false;
         }
-        if (!player.playerBoard().hasFigures(figureCount)) {
+        if (!player.getPlayerBoard().hasFigures(figureCount)) {
             return false;
         }
         ArrayList<PlayerOrder> figureColors = new ArrayList<>();
@@ -72,8 +70,9 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
             return false;
         }
         for (int i = 0; i < figureCount; i++) {
-            this.figures.add(player.playerOrder());
+            this.figures.add(player.getPlayerOrder());
         }
+        player.getPlayerBoard().takeFigures(figureCount);
         return true;
     }
 
@@ -102,10 +101,11 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
      * @return an {@link ActionResult} indicating the result of the action
      */
     @Override
-    public ActionResult makeAction(Player player, Effect[] inputResources, Effect[] outputResources) {
-        if (currentPlayer == null && currentThrow == null) {
+    public ActionResult makeAction(Player player, Collection<Effect> inputResources, Collection<Effect> outputResources) {
+
+        if (currentPlayer == null || currentThrow == null) {
             int countPlayerFigures = (int) figures.stream()
-                    .filter(playerOrder -> playerOrder.equals(player.playerOrder()))
+                    .filter(playerOrder -> playerOrder.equals(player.getPlayerOrder()))
                     .count();
             currentPlayer = player;
             currentThrow = new CurrentThrow();
@@ -115,10 +115,13 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
         if (player != currentPlayer) {
             return ActionResult.FAILURE;
         }
-        if (inputResources.length == 0) {
+        if (inputResources.isEmpty()) {
             currentThrow.finishUsingTools();
             currentThrow = null;
             currentPlayer = null;
+            while (figures.contains(player.getPlayerOrder())) {
+                figures.remove(player.getPlayerOrder());
+            }
             return ActionResult.ACTION_DONE;
         }
         for (Effect inputResource : inputResources) {
@@ -135,15 +138,20 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
                 }
             }
         }
-        if (usedToolCount != inputResources.length) {
+        if (usedToolCount != inputResources.size()) {
             return ActionResult.FAILURE;
         }
+        figures.remove(player.getPlayerOrder());
+        currentThrow.finishUsingTools();
         return ActionResult.ACTION_DONE;
     }
     //Cannot skip action
     @Override
     public boolean skipAction(Player player) {
         return false;
+    }
+    public ArrayList<PlayerOrder> getFigures() {
+        return figures;
     }
 
     /**
@@ -154,12 +162,15 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
      */
     @Override
     public HasAction tryToMakeAction(Player player) {
+        if (!figures.contains(player.getPlayerOrder())){
+            return HasAction.NO_ACTION_POSSIBLE;
+        }
         if (currentThrow != null && currentThrow.canUseTools() && this.currentPlayer == player) {
             return HasAction.WAITING_FOR_PLAYER_ACTION;
         }
-        if (currentPlayer == null && figures.contains(player.playerOrder())) {
-            makeAction(player, new Effect[0], new Effect[0]);
-            return HasAction.AUTOMATIC_ACTION_DONE;
+        if (currentPlayer == null && figures.contains(player.getPlayerOrder())) {
+            currentPlayer = player;
+            return HasAction.WAITING_FOR_PLAYER_ACTION;
         }
         return HasAction.NO_ACTION_POSSIBLE;
     }
@@ -171,11 +182,8 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
      */
     @Override
     public boolean newTurn() {
-        if (figures.isEmpty()) {
-            this.currentThrow = null;
-            this.currentPlayer = null;
-            return true;
-        }
+        this.currentThrow = null;
+        this.currentPlayer = null;
         return false;
     }
 
@@ -197,15 +205,28 @@ public class ResourceSource implements InterfaceFigureLocationInternal {
      */
     @Override
     public String state() {
-        Map<String, Object> state = Map.of(
-                "name", name,
-                "resource", resource,
-                "maxFigures", maxFigures,
-                "maxFigureColors", maxFigureColors,
-                "figures", figures.stream().map(PlayerOrder::getOrder).toList(),
-                "currentThrow", currentThrow,
-                "currentPlayer", currentPlayer
-        );
+        Map<String, Object> state;
+        if (figures.isEmpty()) {
+             state = Map.of(
+                    "name", name,
+                    "resource", resource,
+                    "maxFigures", maxFigures,
+                    "maxFigureColors", maxFigureColors,
+                    "figures", new ArrayList<>(),
+                    "currentThrow", currentThrow,
+                    "currentPlayer", currentPlayer
+            );
+        }else{
+            state = Map.of(
+                    "name", name,
+                    "resource", resource,
+                    "maxFigures", maxFigures,
+                    "maxFigureColors", maxFigureColors,
+                    "figures", List.copyOf(figures),
+                    "currentThrow", currentThrow == null ? "null" : currentThrow.state(),
+                    "currentPlayer", currentPlayer == null ? "null" : currentPlayer
+            );
+        }
         return new JSONObject(state).toString();
     }
 }
